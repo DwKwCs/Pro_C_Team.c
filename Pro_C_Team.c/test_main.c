@@ -17,7 +17,7 @@ int main()
 	printf("지뢰 찾기 영역 크기 입력(가로, 세로) : ");
 	scanf("%d %d", &x, &y);
 
-	mine_num = (x * y) / 4;
+	mine_num = (x * y) * 4 / 25;
 	mine_rem = mine_num;
 
 	//  2차원 배열 동적 할당. 지뢰를 배치할 field 생성.
