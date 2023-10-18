@@ -5,12 +5,14 @@
 
 void set_mine(int** field, int x, int y, int mine_num);
 void print_mine(int** field, int x, int y);
-void print_cover(char** cover, int x, int y, int* mine_rem);
+void print_cover(char** cover, int x, int y, int mine_rem);
+int check_mine(int** field, int a, int b);
 
 int main() 
 {
 	int x, y;  //  2차원 배열 크기 입력. x = 가로, y = 세로.
 	int a, b;  //  사용자가 입력한 지뢰의 좌표
+	char f;  //  사용자가 깃발 생성. S->깃발x, F->깃발o.
 	int mine_num;  //  초기 지뢰의 수
 	int i, j;
 	int mine_rem;  //  남은 지뢰의 수
@@ -37,7 +39,7 @@ int main()
 	//  2차원 배열 'O'으로 초기화
 	for (i = 0; i < y; i++) {
 		for (j = 0; j < x; j++)
-			cover[i][j] = 'O';
+			cover[i][j] = '@';
 	}
 
 	//  지뢰 배치
@@ -49,23 +51,37 @@ int main()
 	else
 		printf("\n지뢰 배치 성공! 지뢰 찾기 시작!\n");
 
-	//print_mine(field, x, y);  지뢰 배치 확인 용
+	print_mine(field, x, y);  //  지뢰 배치 확인 용
 
 	//  지뢰 찾기 시작
 	print_cover(cover, x, y, mine_num);
-	printf("\n지뢰의 좌표는? : ");
-	scanf("%d %d", &a, &b);
 
-	/*
 	while (mine_rem) {
-		if (a >= x || b >= y) {
-			printf("잘못된 좌표입력입니다.\n");
+		while (1) {
+			printf("\n깃발을 세우려면 앞에 F를 입력, 아니면 S를 입력. ex)좌표 : S 5 7\n지뢰의 좌표는? : ");
+			scanf("%c %d %d", &f, &a, &b);
+			if (a >= x || b >= y)
+				printf("잘못된 좌표입력입니다!\n");
+			else
+				break;
 		}
 
-		check_mine(field, cover, a, b, mine_rem);
-		print_field(field, x, y, mine_rem);
+		if (f == 'S') {
+			int c = check_mine(field, a, b, &mine_rem);
+			if (c != 0) {
+				cover[b][a] = c + 48;
+			}
+			else if (c == 0) {
+				cover[b][a] = '*';
+				print_cover(cover, x, y, mine_rem);
+				printf("지뢰를 밟았습니다!\n");
+				exit(0);
+			}
+		}
+		else if (f == 'F') cover[b][a] = 'F';
+
+		print_cover(cover, x, y, mine_rem);
 	}
-	*/
 
 	//  2차원 배열 메모리 해제
 	for (i = 0; i < y; i++)
@@ -112,11 +128,11 @@ void print_mine(int** field, int x, int y) {
 	}
 }
 
-void print_cover(char** cover, int x, int y, int* mine_rem) {
+void print_cover(char** cover, int x, int y, int mine_rem) {
 	int i, j;
 
 	printf("\n\n---------- Print Field ----------\n\n");
-	printf("남은 지뢰 개수 : %d\n\n", mine_rem);
+	printf("지뢰 개수 : %d\n\n", mine_rem);
 
 	printf("  ");
 	for (i = 0; i < x; i++) {
@@ -130,4 +146,25 @@ void print_cover(char** cover, int x, int y, int* mine_rem) {
 		}
 		printf("\n");
 	}
+}
+
+int check_mine(int** field, int a, int b) {
+	int m = 0;
+	if (field[b][a] == 0) {
+		for (int i = 0; i < 3; i++) {
+			if (field[b - 1][(a - 1) + i] == 1)
+				m++;
+		}
+		if (field[b][a - 1] == 1)
+			m++;
+		if (field[b][a + 1] == 1)
+			m++;
+		for (int i = 0; i < 3; i++) {
+			if (field[b + 1][(a - 1) + i] == 1)
+				m++;
+		}
+	}
+	else if(field[b][a] == 1) return m;
+
+	return m;
 }
