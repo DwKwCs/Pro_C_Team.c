@@ -5,8 +5,8 @@
 
 void set_mine(int** field, int x, int y, int mine_num);
 void print_mine(int** field, int x, int y);
-void print_cover(char** cover, int x, int y, int mine_rem);
-int check_mine(int** field, int a, int b);
+void print_cover(char** cover, int x, int y, int mine_num);
+int check_mine(int** field, int a, int b, int x, int y);
 
 int main() 
 {
@@ -15,12 +15,11 @@ int main()
 	char f;  //  사용자가 깃발 생성. S->깃발x, F->깃발o.
 	int mine_num;  //  초기 지뢰의 수
 	int i, j;
-	int mine_rem;  //  남은 지뢰의 수
+	int g = 1;  //  지뢰찾기 종료 시 0
 	printf("지뢰 찾기 영역 크기 입력(가로, 세로) : ");
 	scanf("%d %d", &x, &y);
 
 	mine_num = (x * y) * 4 / 25;
-	mine_rem = mine_num;
 
 	//  2차원 배열 동적 할당. 지뢰를 배치할 field 생성.
 	int** field = (int**)malloc(sizeof(int*) * y);
@@ -39,7 +38,7 @@ int main()
 	//  2차원 배열 'O'으로 초기화
 	for (i = 0; i < y; i++) {
 		for (j = 0; j < x; j++)
-			cover[i][j] = '@';
+			cover[i][j] = 'O';
 	}
 
 	//  지뢰 배치
@@ -56,7 +55,7 @@ int main()
 	//  지뢰 찾기 시작
 	print_cover(cover, x, y, mine_num);
 
-	while (mine_rem) {
+	while (g) {
 		while (1) {
 			printf("\n깃발을 세우려면 앞에 F를 입력, 아니면 S를 입력. ex)좌표 : S 5 7\n지뢰의 좌표는? : ");
 			scanf("%c %d %d", &f, &a, &b);
@@ -67,20 +66,30 @@ int main()
 		}
 
 		if (f == 'S') {
-			int c = check_mine(field, a, b, &mine_rem);
+			int c = check_mine(field, a, b, x, y);
 			if (c != 0) {
 				cover[b][a] = c + 48;
 			}
 			else if (c == 0) {
 				cover[b][a] = '*';
-				print_cover(cover, x, y, mine_rem);
-				printf("지뢰를 밟았습니다!\n");
-				exit(0);
+				print_cover(cover, x, y, mine_num);
+				printf("\n(%d, %d)좌표의 지뢰를 밟았습니다!\n", a, b);
+				g = 0;
 			}
 		}
 		else if (f == 'F') cover[b][a] = 'F';
 
-		print_cover(cover, x, y, mine_rem);
+		if(g == 1)
+			print_cover(cover, x, y, mine_num);
+		else if (g == 0) {
+			for (i = 0; i < y; i++) {
+				for (j = 0; j < x; j++) {
+					if(field[i][j] == 1)
+						cover[i][j] = '*';
+				}
+			}
+			print_cover(cover, x, y, mine_num);
+		}
 	}
 
 	//  2차원 배열 메모리 해제
@@ -128,11 +137,11 @@ void print_mine(int** field, int x, int y) {
 	}
 }
 
-void print_cover(char** cover, int x, int y, int mine_rem) {
+void print_cover(char** cover, int x, int y, int mine_num) {
 	int i, j;
 
 	printf("\n\n---------- Print Field ----------\n\n");
-	printf("지뢰 개수 : %d\n\n", mine_rem);
+	printf("지뢰 개수 : %d\n\n", mine_num);
 
 	printf("  ");
 	for (i = 0; i < x; i++) {
@@ -148,20 +157,138 @@ void print_cover(char** cover, int x, int y, int mine_rem) {
 	}
 }
 
-int check_mine(int** field, int a, int b) {
+int check_mine(int** field, int a, int b, int x, int y) {
 	int m = 0;
 	if (field[b][a] == 0) {
-		for (int i = 0; i < 3; i++) {
-			if (field[b - 1][(a - 1) + i] == 1)
-				m++;
+		if (a == 0) {
+			if (b == 0) {
+				if (field[b][a+1] == 1)
+					m++;
+				if (field[b+1][a+1] == 1)
+					m++;
+				if (field[b+1][a] == 1)
+					m++;
+			}
+			else if (b == y-1) {
+				if (field[b][a + 1] == 1)
+					m++;
+				if (field[b -1][a + 1] == 1)
+					m++;
+				if (field[b - 1][a] == 1)
+					m++;
+			}
+			else {
+				for (int i = 0; i < 2; i++) {
+					if (field[b-1][a + i] == 1)
+						m++;
+				}
+				if (field[b][a + 1] == 1)
+					m++;
+				for (int i = 0; i < 2; i++) {
+					if (field[b + 1][a + i] == 1)
+						m++;
+				}
+			}
 		}
-		if (field[b][a - 1] == 1)
-			m++;
-		if (field[b][a + 1] == 1)
-			m++;
-		for (int i = 0; i < 3; i++) {
-			if (field[b + 1][(a - 1) + i] == 1)
+		else if (b == 0) {
+			if (a == 0) {
+				if (field[b][a + 1] == 1)
+					m++;
+				if (field[b + 1][a + 1] == 1)
+					m++;
+				if (field[b + 1][a] == 1)
+					m++;
+			}
+			else if (a == x - 1) {
+				if (field[b][a - 1] == 1)
+					m++;
+				if (field[b + 1][a - 1] == 1)
+					m++;
+				if (field[b + 1][a] == 1)
+					m++;
+			}
+			else {
+				for (int i = 0; i < 3; i++) {
+					if (field[b + 1][(a-1) + i] == 1)
+						m++;
+				}
+				if (field[b][a + 1] == 1)
+					m++;
+				if (field[b][a - 1] == 1)
+					m++;
+			}
+		}
+		else if (a == x - 1) {
+			if (b == 0) {
+				if (field[b][a - 1] == 1)
+					m++;
+				if (field[b + 1][a - 1] == 1)
+					m++;
+				if (field[b + 1][a] == 1)
+					m++;
+			}
+			else if (b == y - 1) {
+				if (field[b][a - 1] == 1)
+					m++;
+				if (field[b - 1][a - 1] == 1)
+					m++;
+				if (field[b - 1][a] == 1)
+					m++;
+			}
+			else {
+				for (int i = 0; i < 2; i++) {
+					if (field[b - 1][(a-1) + i] == 1)
+						m++;
+				}
+				if (field[b][a - 1] == 1)
+					m++;
+				for (int i = 0; i < 2; i++) {
+					if (field[b + 1][(a-1) + i] == 1)
+						m++;
+				}
+			}
+		}
+		else if (b == y - 1) {
+			if (a == 0) {
+				if (field[b][a + 1] == 1)
+					m++;
+				if (field[b - 1][a + 1] == 1)
+					m++;
+				if (field[b - 1][a] == 1)
+					m++;
+			}
+			else if (a == x - 1) {
+				if (field[b][a - 1] == 1)
+					m++;
+				if (field[b - 1][a - 1] == 1)
+					m++;
+				if (field[b - 1][a] == 1)
+					m++;
+			}
+			else {
+				for (int i = 0; i < 3; i++) {
+					if (field[b - 1][(a - 1) + i] == 1)
+						m++;
+				}
+				if (field[b][a + 1] == 1)
+					m++;
+				if (field[b][a - 1] == 1)
+					m++;
+			}
+		}
+		else {
+			for (int i = 0; i < 3; i++) {
+				if (field[b - 1][(a - 1) + i] == 1)
+					m++;
+			}
+			if (field[b][a - 1] == 1)
 				m++;
+			if (field[b][a + 1] == 1)
+				m++;
+			for (int i = 0; i < 3; i++) {
+				if (field[b + 1][(a - 1) + i] == 1)
+					m++;
+			}
 		}
 	}
 	else if(field[b][a] == 1) return m;
