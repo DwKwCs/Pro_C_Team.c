@@ -688,6 +688,8 @@ void LeftBtnDown(int a_mixed_key, POINT a_pos)
 				t++;
 			}
 			KillTimer(1);
+			a_data->WinCount = 0;
+			a_data->flagMine = 0;
 		}
 	}
 
@@ -870,6 +872,8 @@ void LeftBtnDown(int a_mixed_key, POINT a_pos)
 					t++;
 				}
 				KillTimer(1);
+				a_data->WinCount = 0;
+				a_data->flagMine = 0;
 			}
 		}
 	}
