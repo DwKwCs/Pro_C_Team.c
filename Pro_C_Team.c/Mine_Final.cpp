@@ -375,6 +375,10 @@ void SetField(INT32 a_ctrl_id, INT32 a_notify_code, void* ap_ctrl) {
 	case 6:  //  필드 지우기
 		Field_Start_x = 600;
 		Field_Start_y = 390;
+
+		Field_Size_x = 0;
+		Field_Size_y = 0;
+
 		a_data->fc = 0;
 		// 시작 시간을 초기화 한다.
 		a_data->sec = 0;
@@ -696,6 +700,8 @@ void LeftBtnDown(int a_mixed_key, POINT a_pos)
 	//  좌클릭 시
 	else
 	{
+		if (Field_Start_x == 600 && Field_Start_y == 390)
+			return;
 		//  초기에 좌클릭을 했을 시, 클릭한 좌표 빼고 필드에 지뢰를 생성
 		if (a_data->fc == 0)
 		{
